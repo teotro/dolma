@@ -102,7 +102,12 @@ namespace X86ISA
         uint64_t lruSeq;
 
         unsigned num_threads_per_core;
-
+        
+        //[Teo] Latencies for a TLB hit, miss and page fault
+        int hitLatency;
+        int missLatency1;
+        int missLatency2;
+        
         // Statistics
         Stats::Scalar rdAccesses;
         Stats::Scalar wrAccesses;
@@ -114,12 +119,19 @@ namespace X86ISA
         Stats::Scalar dolmaWrAccesses;
         Stats::Scalar dolmaRdMisses;
         Stats::Scalar dolmaWrMisses;
+        
+        //[Teo] Extra Stats added by Teo
+        Stats::Scalar latency;
+        Stats::Scalar NumTLBAccesses;
+        Stats::Scalar NumTLBHits;
+        Stats::Scalar NumTLBMisses;
 
         Fault translateInt(const RequestPtr &req, ThreadContext *tc);
-
+        
+        //[Teo] Adding latency as parameter to translate function
         Fault translate(const RequestPtr &req, ThreadContext *tc,
                 Translation *translation, Mode mode,
-                bool &delayedResponse, bool timing);
+                bool &delayedResponse, bool timing, int &latency);
 
       public:
 
@@ -131,11 +143,12 @@ namespace X86ISA
             return ++lruSeq;
         }
 
+        //[Teo] Adding latency as parameter to translateAtomic and trnaslateTiming functions
         Fault translateAtomic(
-            const RequestPtr &req, ThreadContext *tc, Mode mode) override;
+            const RequestPtr &req, ThreadContext *tc, Mode mode, int &latency) override; //[Teo] I'm not sure whether or not "override" has functionality, but I think it is OK
         void translateTiming(
             const RequestPtr &req, ThreadContext *tc,
-            Translation *translation, Mode mode) override;
+            Translation *translation, Mode mode, int &latency) override;
         void updateLRU(const RequestPtr &req,
           ThreadContext *tc,
           Mode mode) override;
