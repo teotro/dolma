@@ -58,3 +58,6 @@ class X86TLB(BaseTLB):
     walker = Param.X86PagetableWalker(\
             X86PagetableWalker(), "page table walker")
     num_threads_per_core = Param.Unsigned(2, "Num logical threads per core")
+    hitLatency = Param.Int(2, "Latency of a TLB hit")
+    missLatency1 = Param.Int(5, "Latency #1 of a TLB miss")
+    missLatency2 = Param.Int(100, "Latency #2 of a TLB miss")
