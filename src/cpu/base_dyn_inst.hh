@@ -1360,7 +1360,8 @@ BaseDynInst<Impl>::initiateTranslation(const RequestPtr &req,
 
         // DOLMA: hackish way of checking if we speculatively missed
         wasRestricted = req->isRestricted();
-        cpu->dtb->translateTiming(req, thread->getTC(), trans, mode);
+      //[Teo] adding latency as parameter
+        cpu->dtb->translateTiming(req, thread->getTC(), trans, mode, latency);
         if (wasRestricted && isDolmaRestricted() && !req->isRestricted()) {
             assert(!cpu->isSTT());
             setDolmaStalled();
@@ -1391,7 +1392,8 @@ BaseDynInst<Impl>::initiateTranslation(const RequestPtr &req,
 
         // DOLMA: hackish way of checking if we speculatively missed
         wasRestricted = sreqLow->isRestricted();
-        cpu->dtb->translateTiming(sreqLow, thread->getTC(), stransLow, mode);
+      \\[Teo] adding latency
+        cpu->dtb->translateTiming(sreqLow, thread->getTC(), stransLow, mode, latency);
         if (wasRestricted && isDolmaRestricted() && !sreqLow->isRestricted()) {
             assert(!cpu->isSTT());
             setDolmaStalled();
@@ -1400,7 +1402,8 @@ BaseDynInst<Impl>::initiateTranslation(const RequestPtr &req,
 
         // DOLMA: hackish way of checking if we speculatively missed
         wasRestricted = sreqHigh->isRestricted();
-        cpu->dtb->translateTiming(sreqHigh, thread->getTC(), stransHigh, mode);
+      //[Teo] adding latency as parameter
+        cpu->dtb->translateTiming(sreqHigh, thread->getTC(), stransHigh, mode, latency);
         if (wasRestricted && isDolmaRestricted() && !sreqHigh->isRestricted()) {
             assert(!cpu->isSTT());
             setDolmaStalled();
