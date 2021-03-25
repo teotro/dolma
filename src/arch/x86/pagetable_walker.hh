@@ -110,6 +110,8 @@ namespace X86ISA
             bool functional;
             bool timing;
             bool retrying;
+            //[Teo] Adding and instantiate latency as a parameter
+            int latency;
             bool started;
           public:
             WalkerState(Walker * _walker, BaseTLB::Translation *_translation,
@@ -118,7 +120,7 @@ namespace X86ISA
                 nextState(Ready), inflight(0),
                 translation(_translation),
                 functional(_isFunctional), timing(false),
-                retrying(false), started(false)
+                retrying(false), started(false), latency(0)
             {
             }
             void initState(ThreadContext * _tc, BaseTLB::Mode _mode,
