@@ -80,6 +80,11 @@ TLB::TLB(const Params *p)
 
     walker = p->walker;
     walker->setTLB(this);
+          
+    //[Teo] Instantiate latencies
+    hitLatency = p->hitLatency;
+    missLatency1 = p->missLatency1;
+    missLatency2 =  p->missLatency2;
 }
 
 void
@@ -412,6 +417,9 @@ TLB::translate(const RequestPtr &req,
                 }
             }
             if (!entry) {
+                NumTLBMisses++; //[Teo] Count all TLB misses
+                latency = missLatency1; //[Teo] Adding latency for a TLB miss
+                
                 DPRINTF(TLB, "Handling a TLB miss for address %#x at pc %#x (mode == %s).\n",
                         vaddr, tc->instAddr(), mode == Write ? "Write" : "Read");
                 if (mode == Write) {
@@ -431,20 +439,23 @@ TLB::translate(const RequestPtr &req,
                     // could be a spec protection fault for more realism, but this gets the job done
                     return std::make_shared<GeneralProtection>(0);
                 }
-                if (FullSystem) {
-                    Fault fault = walker->start(tc, translation, req, mode);
-                    if (timing || fault != NoFault) {
+                if (FullSystem) { //[Teo] Only in FS mode timing is "triggered" and we DO care
+                    Fault fault = walker->start(tc, translation, req, mode); //[Teo] triggering pagetable walker
+                    if (timing || fault != NoFault) {                        //[Teo] only if we use TimingSimpleCPU (?) and there is no fault we trigger clock
                         // This gets ignored in atomic mode.
                         delayedResponse = true;
                         return fault;
                     }
                     entry = lookup(0, vaddr);
                     assert(entry);
-                } else {
+                } else {                                    //[Teo] Let's try to add latencies in SE mode
                     Process *p = tc->getProcessPtr();
                     const EmulationPageTable::Entry *pte =
                         p->pTable->lookup(vaddr);
-                    if (!pte && mode != Execute) {
+                    if (!pte && mode != Execute) {          //[Teo] that means we have a 'page fault', so let's penalized it more
+                        
+                        latency += missLatency2;
+                        
                         // Check if we just need to grow the stack.
                         if (p->fixupStackFault(vaddr)) {
                             // If we did, lookup the entry for the new page.
@@ -465,6 +476,9 @@ TLB::translate(const RequestPtr &req,
                     }
                     DPRINTF(TLB, "Miss was serviced.\n");
                 }
+            } else { //[Teo] TLB hit latency
+                NumTLBHitss++;
+                latency = hitLatency;
             }
 
             DPRINTF(TLB, "Entry found with paddr %#x, "
@@ -510,21 +524,23 @@ TLB::translate(const RequestPtr &req,
     return finalizePhysical(req, tc, mode);
 }
 
-Fault
-TLB::translateAtomic(const RequestPtr &req, ThreadContext *tc, Mode mode)
+//[Teo] Critical part here:  translateAtomic & trnaslateTiming call translate function
+    
+Fault //[Teo] I don't know if it worths to add latency in Atomic mode
+TLB::translateAtomic(const RequestPtr &req, ThreadContext *tc, Mode mode, int &latency)
 {
     bool delayedResponse;
-    return TLB::translate(req, tc, NULL, mode, delayedResponse, false);
+    return TLB::translate(req, tc, NULL, mode, delayedResponse, false, latency);
 }
 
 void
 TLB::translateTiming(const RequestPtr &req, ThreadContext *tc,
-        Translation *translation, Mode mode)
+        Translation *translation, Mode mode, int &latency)
 {
     bool delayedResponse;
     assert(translation);
     Fault fault =
-        TLB::translate(req, tc, translation, mode, delayedResponse, true);
+        TLB::translate(req, tc, translation, mode, delayedResponse, true, latency);
     if (!delayedResponse)
         translation->finish(fault, req, tc, mode);
 }
@@ -571,6 +587,31 @@ TLB::regStats()
     dolmaWrMisses
         .name(name() + ".dolmaWrMisses")
         .desc("TLB misses on dolma write requests");
+    
+    //[Teo] Some extra stats
+    NumTLBHits
+        .name(name() + ".numTLBHits")
+        .desc("Total TLB hits");
+    
+    NumTLBMisses
+        .name(name() + ".numTLBMisses")
+        .desc("Total TLB Misses");
+    
+    NumTLBAccesses
+        .name(name() + ".numTLBAccesses")
+        .desc("Total TLB Accesses");
+    
+    TLBMissRate
+        .name(name() + ".TLBMissRate")
+        .desc("TLB Miss Rate");
+    
+    TLBMissRate = 100 * NumTLBMisses / NumTLBAccesses;
+    
+    latency                         //[Teo] I'm gonna add this latency later on total clock ticks
+        .name(name() + ".latency")
+        .desc("Latency due to TLB activity")
+    
+    
 }
 
 void
