@@ -96,10 +96,10 @@ class BaseTLB : public SimObject
           Mode mode) = 0;
 
     virtual Fault translateAtomic(
-            const RequestPtr &req, ThreadContext *tc, Mode mode) = 0;
+            const RequestPtr &req, ThreadContext *tc, Mode mode, int &latency) = 0;
     virtual void translateTiming(
             const RequestPtr &req, ThreadContext *tc,
-            Translation *translation, Mode mode) = 0;
+            Translation *translation, Mode mode, int &latency) = 0;
     
     virtual Fault
     translateFunctional(const RequestPtr &req, ThreadContext *tc, Mode mode)
@@ -159,10 +159,10 @@ class GenericTLB : public BaseTLB
     void demapPage(Addr vaddr, uint64_t asn) override;
 
     Fault translateAtomic(
-        const RequestPtr &req, ThreadContext *tc, Mode mode) override;
+        const RequestPtr &req, ThreadContext *tc, Mode mode, int &latency) override;
     void translateTiming(
         const RequestPtr &req, ThreadContext *tc,
-        Translation *translation, Mode mode) override;
+        Translation *translation, Mode mode, int &latency) override;
     void updateLRU(const RequestPtr &req,
           ThreadContext *tc,
           Mode mode) override;
