@@ -355,14 +355,14 @@ AtomicSimpleCPU::readMem(Addr addr, uint8_t * data, unsigned size,
         size = secondAddr - addr;
 
     dcache_latency = 0;
-
+    int latency;
     req->taskId(taskId());
     while (1) {
         req->setVirt(0, addr, size, flags, dataMasterId(), thread->pcState().instAddr());
 
         // translate to physical address
         Fault fault = thread->dtb->translateAtomic(req, thread->getTC(),
-                                                          BaseTLB::Read);
+                                                          BaseTLB::Read, latency);
 
         // Now do the access.
         if (fault == NoFault && !req->getFlags().isSet(Request::NO_ACCESS)) {
@@ -456,13 +456,13 @@ AtomicSimpleCPU::writeMem(uint8_t *data, unsigned size, Addr addr,
         size = secondAddr - addr;
 
     dcache_latency = 0;
-
+    int latency;
     req->taskId(taskId());
     while (1) {
         req->setVirt(0, addr, size, flags, dataMasterId(), thread->pcState().instAddr());
 
         // translate to physical address
-        Fault fault = thread->dtb->translateAtomic(req, thread->getTC(), BaseTLB::Write);
+        Fault fault = thread->dtb->translateAtomic(req, thread->getTC(), BaseTLB::Write, latency);
 
         // Now do the access.
         if (fault == NoFault) {
@@ -575,14 +575,14 @@ AtomicSimpleCPU::tick()
         Fault fault = NoFault;
 
         TheISA::PCState pcState = thread->pcState();
-
+        int latency;
         bool needToFetch = !isRomMicroPC(pcState.microPC()) &&
                            !curMacroStaticInst;
         if (needToFetch) {
             ifetch_req->taskId(taskId());
             setupFetchRequest(ifetch_req);
             fault = thread->itb->translateAtomic(ifetch_req, thread->getTC(),
-                                                 BaseTLB::Execute);
+                                                 BaseTLB::Execute, latency);
         }
 
         if (fault == NoFault) {
