@@ -346,9 +346,9 @@ BaseCPU::mwaitAtomic(ThreadID tid, ThreadContext *tc, BaseTLB *dtb)
         size = secondAddr - addr;
 
     req->setVirt(0, addr, size, 0x0, dataMasterId(), tc->instAddr());
-
+    int latency;
     // translate to physical address
-    Fault fault = dtb->translateAtomic(req, tc, BaseTLB::Read);
+    Fault fault = dtb->translateAtomic(req, tc, BaseTLB::Read, latency);
     assert(fault == NoFault);
 
     monitor.pAddr = req->getPaddr() & mask;
