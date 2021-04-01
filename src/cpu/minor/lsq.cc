@@ -258,13 +258,13 @@ LSQ::SingleDataRequest::startAddrTranslation()
     port.numAccessesInDTLB++;
 
     setState(LSQ::LSQRequest::InTranslation);
-
+    int latency;
     DPRINTFS(MinorMem, (&port), "Submitting DTLB request\n");
     /* Submit the translation request.  The response will come through
      *  finish/markDelayed on the LSQRequest as it bears the Translation
      *  interface */
     thread->getDTBPtr()->translateTiming(
-        request, thread, this, (isLoad ? BaseTLB::Read : BaseTLB::Write));
+        request, thread, this, (isLoad ? BaseTLB::Read : BaseTLB::Write, latency));
 }
 
 void
