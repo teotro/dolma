@@ -178,7 +178,7 @@ class BaseDynInst : public ExecContext, public RefCounted
     /** InstRecord that tracks this instructions. */
     Trace::InstRecord *traceData;
     
-    WaitClass latency   //[Teo] *TODO* Implement WaitClass... Probably at src/arch/x86/regs/misc.hh (?)
+    int latency ;  
 
   protected:
     /** The result of the instruction; assumes an instruction can have many
