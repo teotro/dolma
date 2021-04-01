@@ -121,10 +121,11 @@ namespace X86ISA
         Stats::Scalar dolmaWrMisses;
         
         //[Teo] Extra Stats added by Teo
-        Stats::Scalar latency;
+        Stats::Scalar latency; //This not working...Probably should pass it by reference
         Stats::Scalar NumTLBAccesses;
         Stats::Scalar NumTLBHits;
         Stats::Scalar NumTLBMisses;
+        Stats::Scalar delay; //This works...not interfering with "translateAtomic" & "translateTiming" functions
 
         Fault translateInt(const RequestPtr &req, ThreadContext *tc);
         
