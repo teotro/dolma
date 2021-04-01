@@ -613,10 +613,10 @@ LSQ::SplitDataRequest::sendNextFragmentToTranslation()
 
     port.numAccessesInDTLB++;
     numInTranslationFragments++;
-
+    int latency;
     thread->getDTBPtr()->translateTiming(
         fragmentRequests[fragment_index], thread, this, (isLoad ?
-        BaseTLB::Read : BaseTLB::Write));
+        BaseTLB::Read : BaseTLB::Write, latency));
 }
 
 bool
