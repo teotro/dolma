@@ -434,7 +434,7 @@ TimingSimpleCPU::initiateMemRead(Addr addr, unsigned size,
     const Addr pc = thread->instAddr();
     unsigned block_size = cacheLineSize();
     BaseTLB::Mode mode = BaseTLB::Read;
-
+    int latency;
     if (traceData)
         traceData->setMem(addr, size, flags);
 
@@ -461,14 +461,14 @@ TimingSimpleCPU::initiateMemRead(Addr addr, unsigned size,
         DataTranslation<TimingSimpleCPU *> *trans2 =
             new DataTranslation<TimingSimpleCPU *>(this, state, 1);
 
-        thread->dtb->translateTiming(req1, thread->getTC(), trans1, mode);
-        thread->dtb->translateTiming(req2, thread->getTC(), trans2, mode);
+        thread->dtb->translateTiming(req1, thread->getTC(), trans1, mode, latency);
+        thread->dtb->translateTiming(req2, thread->getTC(), trans2, mode, latency);
     } else {
         WholeTranslationState *state =
             new WholeTranslationState(req, new uint8_t[size], NULL, mode);
         DataTranslation<TimingSimpleCPU *> *translation
             = new DataTranslation<TimingSimpleCPU *>(this, state);
-        thread->dtb->translateTiming(req, thread->getTC(), translation, mode);
+        thread->dtb->translateTiming(req, thread->getTC(), translation, mode, latency);
     }
 
     return NoFault;
@@ -508,7 +508,7 @@ TimingSimpleCPU::writeMem(uint8_t *data, unsigned size,
     const Addr pc = thread->instAddr();
     unsigned block_size = cacheLineSize();
     BaseTLB::Mode mode = BaseTLB::Write;
-
+    int latency;
     if (data == NULL) {
         assert(flags & Request::STORE_NO_DATA);
         // This must be a cache block cleaning request
@@ -542,14 +542,14 @@ TimingSimpleCPU::writeMem(uint8_t *data, unsigned size,
         DataTranslation<TimingSimpleCPU *> *trans2 =
             new DataTranslation<TimingSimpleCPU *>(this, state, 1);
 
-        thread->dtb->translateTiming(req1, thread->getTC(), trans1, mode);
-        thread->dtb->translateTiming(req2, thread->getTC(), trans2, mode);
+        thread->dtb->translateTiming(req1, thread->getTC(), trans1, mode, latency);
+        thread->dtb->translateTiming(req2, thread->getTC(), trans2, mode, latency);
     } else {
         WholeTranslationState *state =
             new WholeTranslationState(req, newData, res, mode);
         DataTranslation<TimingSimpleCPU *> *translation =
             new DataTranslation<TimingSimpleCPU *>(this, state);
-        thread->dtb->translateTiming(req, thread->getTC(), translation, mode);
+        thread->dtb->translateTiming(req, thread->getTC(), translation, mode, latency);
     }
 
     // Translation faults will be returned via finishTranslation()
@@ -604,7 +604,7 @@ TimingSimpleCPU::fetch()
 
     SimpleExecContext &t_info = *threadInfo[curThread];
     SimpleThread* thread = t_info.thread;
-
+    int latency;
     DPRINTF(SimpleCPU, "Fetch\n");
 
     if (!curStaticInst || !curStaticInst->isDelayedCommit()) {
@@ -628,7 +628,7 @@ TimingSimpleCPU::fetch()
         setupFetchRequest(ifetch_req);
         DPRINTF(SimpleCPU, "Translating address %#x\n", ifetch_req->getVaddr());
         thread->itb->translateTiming(ifetch_req, thread->getTC(),
-                &fetchTranslation, BaseTLB::Execute);
+                &fetchTranslation, BaseTLB::Execute, latency);
     } else {
         _status = IcacheWaitResponse;
         completeIfetch(NULL);
