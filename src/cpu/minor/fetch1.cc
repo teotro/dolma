@@ -182,14 +182,14 @@ Fetch1::fetchLine(ThreadID tid)
     /* Reserve space in the queues upstream of requests for results */
     transfers.reserve();
     requests.push(request);
-
+    int latency;
     /* Submit the translation request.  The response will come
      *  through finish/markDelayed on this request as it bears
      *  the Translation interface */
     cpu.threads[request->id.threadId]->itb->translateTiming(
         request->request,
         cpu.getContext(request->id.threadId),
-        request, BaseTLB::Execute);
+        request, BaseTLB::Execute, latency);
 
     lineSeqNum++;
 
