@@ -445,6 +445,7 @@ TLB::translate(const RequestPtr &req,
                     return std::make_shared<GeneralProtection>(0);
                 }
                 if (FullSystem) { //[Teo] Only in FS mode timing is "triggered" and we DO care
+                    DPRINTF(TLB, "an emfanistei auto kati den paei kala");
                     Fault fault = walker->start(tc, translation, req, mode); //[Teo] triggering pagetable walker
                     if (timing || fault != NoFault) {                        //[Teo] only if we use TimingSimpleCPU (?) and there is no fault we trigger clock
                         // This gets ignored in atomic mode.
@@ -553,6 +554,7 @@ TLB::translateTiming(const RequestPtr &req, ThreadContext *tc,
     Fault fault =
         TLB::translate(req, tc, translation, mode, delayedResponse, true, latency);
     if (!delayedResponse)
+        DPRINTF(TLB, "prokeitai na ektelestei h finish sto tlb.cc\n");
         translation->finish(fault, req, tc, mode);
 }
 
