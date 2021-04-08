@@ -47,7 +47,7 @@
 
 #include "arch/generic/tlb.hh"
 #include "sim/faults.hh"
-
+#include "debug/TEO.hh
 /**
  * This class captures the state of an address translation.  A translation
  * can be split in two if the ISA supports it and the memory access crosses
@@ -258,6 +258,7 @@ class DataTranslation : public BaseTLB::Translation
             if (state->getFault() == NoFault) {
                 // Don't access the request if faulted (due to squash)
                 req->setTranslateLatency();
+                DPRINTF(TEO, " Mpainei sti finish tou translation.hh - to req einai %d\n", req);
             }
             xc->finishTranslation(state);
         }
