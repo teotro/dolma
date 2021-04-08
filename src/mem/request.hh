@@ -60,6 +60,7 @@
 #include "base/types.hh"
 #include "cpu/inst_seq.hh"
 #include "sim/core.hh"
+#include "base/trace.hh"
 
 /**
  * Special TaskIds that are used for per-context-switch stats dumps
@@ -823,7 +824,8 @@ class Request
     /**
      * Set/Get the time taken for this request to be successfully translated.
      */
-    void setTranslateLatency() { translateDelta = curTick() - _time; }
+    void setTranslateLatency() { translateDelta = curTick() - _time; 
+                               DPRINTF(MMU, "translateDelta is %d\n", translateDelta);}
     Tick getTranslateLatency() const { return translateDelta; }
 
     /**
