@@ -421,6 +421,8 @@ TLB::translate(const RequestPtr &req,
                 
                 latency += missLatency1; //[Teo] Prosthetw sthn synoliki kathisterisi latency gia tlb miss
                 
+                DPRINTF(TLB, "Latency due to TLB miss is %d cycles.\n", latency);
+                
                 delay += missLatency1; //[Teo] Afou den douleuei to latency, tsekaroume na doume an tiponei toulax auto
                 
                 DPRINTF(TLB, "Handling a TLB miss for address %#x at pc %#x (mode == %s).\n",
@@ -458,6 +460,9 @@ TLB::translate(const RequestPtr &req,
                     if (!pte && mode != Execute) {          //[Teo] that means we have a 'page fault', so let's penalized it more
                         
                         latency += missLatency2;
+                        
+                        DPRINTF(TLB, "Latency due to Page Fault is %d cycles.\n", latency);
+                        
                         delay += missLatency2;
                         
                         // Check if we just need to grow the stack.
@@ -613,9 +618,9 @@ TLB::regStats()
     
     TLBMissRate = 100 * NumTLBMisses / NumTLBAccesses;
     
-    latency                         //[Teo] I'm gonna add this latency later on total clock ticks
-        .name(name() + ".latency")
-        .desc("Latency due to TLB activity");
+    //latency                         //[Teo] I'm gonna add this latency later on total clock ticks
+       // .name(name() + ".latency")
+        //.desc("Latency due to TLB activity");
     
     delay                       //[Teo] Just to see if this prints the stats output
         .name(name() + ".delay")
