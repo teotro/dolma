@@ -47,7 +47,7 @@
 
 #include "arch/generic/tlb.hh"
 #include "sim/faults.hh"
-#include "debug/TEO.hh
+#include "debug/TEO.hh"
 /**
  * This class captures the state of an address translation.  A translation
  * can be split in two if the ISA supports it and the memory access crosses
